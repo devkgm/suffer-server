@@ -1,46 +1,26 @@
 const express = require("express");
+const router = express.Router();
+
 const bodyParser = require("body-parser");
 const { Pool } = require("pg");
-const { initializeApp } = require("firebase-admin/app");
-const { getAuth } = require("firebase-admin/auth");
+const login = require("./router/login");
+require("dotenv").config();
+
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-const admin = initializeApp({
-    apiKey: process.env.API_KEY,
-    authDomain: process.env.AUTH_DOMAIN,
-    projectId: process.env.PROJECT_ID,
-    storageBucket: process.env.STORAGE_BUKET,
-    messagingSenderId: process.env.MESSAGING_SENDER_ID,
-    appId: process.env.APP_ID,
-    measurementId: process.env.MEASUREMENT_ID,
-});
-const auth = getAuth(admin);
-// 인증 미들웨어
-async function checkAuth(req, res, next) {
-    auth.verifyIdToken(req.body.idToken)
-        .then((decodedToken) => {
-            const uid = decodedToken.uid;
-            // ...
-            console.log(uid);
-        })
-        .catch((error) => {
-            // Handle error
-            console.error(new Error(error));
-        });
-}
-app.get("/auth", checkAuth, (req, res) => {
-    // 인증된 사용자만 접근 가능한 라우트
-    // 데이터베이스 로직 구현
-});
+app.use(bodyParser.json());
+
+// 인증
+app.use("/login", login);
+
 const pool = new Pool({
-    user: "postgres",
-    password: "7560",
-    host: "gyeongmo806.site",
-    database: "suffer",
-    port: 5432, // PostgreSQL 포트 번호
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    port: process.env.DB_PORT,
 });
 
 pool.connect();
