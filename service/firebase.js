@@ -1,7 +1,10 @@
 const { initializeApp } = require("firebase/app");
 const { getAuth, signInWithEmailAndPassword } = require("firebase/auth");
 const firebaseConfig = require("./config");
-const { generateToken, generateRefreshToken } = require("../tokenManager");
+const {
+    generateToken,
+    generateRefreshToken,
+} = require("../module/tokenManager");
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
