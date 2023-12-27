@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const bodyParser = require("body-parser");
-const { Pool } = require("pg");
 const login = require("./router/login");
 require("dotenv").config();
 
@@ -15,15 +14,6 @@ app.use(bodyParser.json());
 // 인증
 app.use("/login", login);
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    port: process.env.DB_PORT,
-});
-
-pool.connect();
 // 모든 회사 조회
 app.get("/companies", async (req, res) => {
     try {
