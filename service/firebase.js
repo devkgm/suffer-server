@@ -2,8 +2,8 @@ const { initializeApp } = require("firebase/app");
 const { getAuth, signInWithEmailAndPassword } = require("firebase/auth");
 const firebaseConfig = require("./config");
 const { generateToken, generateRefreshToken } = require("../tokenManager");
-const admin = initializeApp(firebaseConfig);
-const auth = getAuth(admin);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 const signIn = async (email, password) => {
     try {
