@@ -1,5 +1,9 @@
 const { initializeApp } = require("firebase/app");
-const { getAuth, signInWithEmailAndPassword } = require("firebase/auth");
+const {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+} = require("firebase/auth");
 const firebaseConfig = require("./config");
 const {
     generateToken,
@@ -26,4 +30,18 @@ const signIn = async (email, password) => {
     }
 };
 
-module.exports = { signIn };
+const registration = async (email, password) => {
+    try {
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+        const user = userCredential.user;
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+module.exports = { signIn, registration };
