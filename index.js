@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bodyParser = require("body-parser");
 const login = require("./router/login");
+const project = require("./router/project");
 
 require("dotenv").config();
 
@@ -13,6 +14,9 @@ app.use(bodyParser.json());
 
 // 인증
 app.use("/login", login);
+
+//project
+app.use("/projects", project);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
