@@ -6,7 +6,6 @@ const { verifyToken } = require("../module/tokenManager");
 router.post("/", async (req, res) => {
     try {
         const { name } = req.body;
-
         const insertQuery = `INSERT INTO "PROJECT" (NAME) VALUES ($1) RETURNING *`;
         const values = [name];
         const result = await db.query(insertQuery, values);
@@ -17,7 +16,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-// 모든 프로젝트 조회 API (GET)
+//전체 프로젝트 리스트
 router.get("/", async (req, res) => {
     try {
         const selectQuery = `SELECT P.*
@@ -28,6 +27,29 @@ router.get("/", async (req, res) => {
 
         const result = await db.query(selectQuery);
 
+        res.json(result.rows);
+    } catch (error) {
+        console.error("프로젝트 조회 중 오류 발생:", error);
+        res.status(500).json({ error: "프로젝트 조회 중 오류 발생" });
+    }
+});
+//개별 프로젝트
+router.get("/:projectId", async (req, res) => {
+    const projectId = req.params.projectId;
+    const values = [projectId];
+    try {
+        const selectQuery = `SELECT T.*, (
+                                SELECT json_agg(C.* ORDER BY C."CREATE_DT" DESC)
+                                FROM "COMMENT" C
+                                WHERE C."TASK_ID" = T."ID"
+                                LIMIT 2
+                            ) AS COMMENTS
+                            FROM "TASK" T
+                            JOIN "PROJECT" P ON T."PROJECT_ID" = P."ID"
+                            WHERE P."ID" = $1 AND T."IS_DELETED" != true;         
+                            `;
+
+        const result = await db.query(selectQuery, values);
         res.json(result.rows);
     } catch (error) {
         console.error("프로젝트 조회 중 오류 발생:", error);
