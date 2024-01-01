@@ -38,8 +38,8 @@ router.get("/", async (req, res) => {
         const selectQuery = `SELECT P.*
                             FROM "PROJECT" P
                             JOIN "MEMBER_PROJECT" MP ON P."ID" = MP."PROJECT_ID"
-                            JOIN "MEMBER" M ON MP."MEMBER_ID" = M."MEMBER_ID"
-                            WHERE M."MEMBER_ID" = $1 AND P."IS_DELETED" != true`;
+                            JOIN "MEMBER" M ON MP."MEMBER_ID" = M."ID"
+                            WHERE M."ID" = $1 AND P."IS_DELETED" != true`;
 
         const result = await db.query(selectQuery, values);
 

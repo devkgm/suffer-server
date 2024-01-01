@@ -4,6 +4,7 @@ const {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
 } = require("firebase/auth");
+
 const firebaseConfig = require("./config");
 const {
     generateToken,
@@ -11,6 +12,7 @@ const {
 } = require("../module/tokenManager");
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = require("../service/db");
 
 const signIn = async (email, password) => {
     try {
@@ -23,7 +25,11 @@ const signIn = async (email, password) => {
         const payload = { email: user.email };
         const refreshToken = generateRefreshToken(payload);
         const accessToken = generateToken(payload);
-        return [user, refreshToken, accessToken];
+
+        const selectQuery = `SELECT * FROM "MEMBER" WHERE "EMAIL" = $1`;
+        const values = [user.email];
+        const info = await db.query(selectQuery, values);
+        return [user, refreshToken, accessToken, info.rows[0]];
     } catch (error) {
         console.error("로그인 실패:", error.code, error.message);
         return [null, null, null];
