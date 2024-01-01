@@ -44,7 +44,9 @@ router.get("/list/:userId", async (req, res) => {
                             FROM "PROJECT" P
                             JOIN "MEMBER_PROJECT" MP ON P."ID" = MP."PROJECT_ID"
                             JOIN "MEMBER" M ON MP."MEMBER_ID" = M."ID"
-                            WHERE M."ID" = $1 AND P."IS_DELETED" != true`;
+                            WHERE M."ID" = $1 AND P."IS_DELETED" != true
+                            ORDER BY P."CREATE_DT" ASC;
+                            `;
 
         const result = await db.query(selectQuery, values);
 
@@ -67,7 +69,8 @@ router.get("/:projectId", async (req, res) => {
                             ) AS COMMENTS
                             FROM "TASK" T
                             JOIN "PROJECT" P ON T."PROJECT_ID" = P."ID"
-                            WHERE P."ID" = $1 AND T."IS_DELETED" != true;         
+                            WHERE P."ID" = $1 AND T."IS_DELETED" != true
+                            ORDER BY T."CREATE_DT" DESC;         
                             `;
 
         const result = await db.query(selectQuery, values);
