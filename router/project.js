@@ -31,11 +31,16 @@ router.post("/", async (req, res) => {
 });
 
 //전체 프로젝트 리스트
-router.get("/", async (req, res) => {
+router.get("/list/:userId", async (req, res) => {
     try {
-        const userId = req.body.userId;
+        const userId = req.params.userId;
         const values = [userId];
-        const selectQuery = `SELECT P.*
+        const selectQuery = `SELECT P.*, (
+                                            SELECT COUNT("ID") 
+                                            FROM "MEMBER_PROJECT" MMP 
+                                            WHERE P."ID" = MMP."PROJECT_ID"
+                                            ) AS MEMBER
+                                          
                             FROM "PROJECT" P
                             JOIN "MEMBER_PROJECT" MP ON P."ID" = MP."PROJECT_ID"
                             JOIN "MEMBER" M ON MP."MEMBER_ID" = M."ID"
