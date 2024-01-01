@@ -5,12 +5,24 @@ const { verifyToken } = require("../module/tokenManager");
 
 //테스크 생성
 router.post("/", async (req, res) => {
-    const { name, description, projectId, ownerId } = req.body;
-    const values = [name, description, projectId, ownerId];
     try {
-        const insertQuery = `INSERT INTO "TASK" ("NAME", "DESCRIPTION", "PROJECT_ID", "OWNER_ID") VALUES ($1,$2,$3,$4) RETURNING *`;
-        const result = await db.query(insertQuery, values);
-        res.status(201).json(result.rows[0]);
+        const { name, description, projectId, ownerId } = req.body;
+        const taskValues = [name, description, projectId, ownerId];
+
+        await db.query("BEGIN");
+
+        const insertTaskQuery = `INSERT INTO "TASK" ("NAME", "DESCRIPTION", "PROJECT_ID", "OWNER_ID") VALUES ($1,$2,$3,$4) RETURNING *`;
+        const taskResult = await db.query(insertTaskQuery, taskValues);
+
+        const memberTaskValues = [ownerId, taskResult.rows[0].ID];
+        const insertMemberTaskQuery = `INSERT INTO "MEMBER_TASK" ("MEMBER_ID", "TASK_ID") VALUES ($1, $2)`;
+        const memberTaskResult = await db.query(
+            insertMemberTaskQuery,
+            memberTaskValues
+        );
+
+        await db.query("COMMIT");
+        res.status(201).json(taskResult.rows[0]);
     } catch (error) {
         console.error("테스크 생성 중 오류 발생: ", error);
         res.status(500).json({ error: "테스크 생성 중 오류 발생" });

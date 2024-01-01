@@ -5,13 +5,27 @@ const { verifyToken } = require("../module/tokenManager");
 
 router.post("/", async (req, res) => {
     try {
-        const { name } = req.body;
-        const insertQuery = `INSERT INTO "PROJECT" (NAME) VALUES ($1) RETURNING *`;
-        const values = [name];
-        const result = await db.query(insertQuery, values);
-        res.status(201).json(result.rows[0]);
+        const { name, ownerId } = req.body;
+
+        await db.query("BEGIN");
+
+        const insertProjectQuery = `INSERT INTO "PROJECT" ("NAME", "OWNER_ID") VALUES ($1, $2) RETURNING *`;
+        const projectValues = [name, ownerId];
+        const projectResult = await db.query(insertProjectQuery, projectValues);
+
+        const insertMemberProjectQuery = `INSERT INTO "MEMBER_PROJECT" ("MEMBER_ID", "PROJECT_ID") VALUES ($1, $2) RETURNING *`;
+        const memberProjectValues = [ownerId, projectResult.rows[0].ID];
+        const memberProjectResult = await db.query(
+            insertMemberProjectQuery,
+            memberProjectValues
+        );
+
+        await db.query("COMMIT");
+
+        res.status(201).json(projectResult.rows[0]);
     } catch (error) {
         console.error("프로젝트 생성 중 오류 발생:", error);
+        await db.query("ROLLBACK");
         res.status(500).json({ error: "프로젝트 생성 중 오류 발생" });
     }
 });
@@ -19,13 +33,15 @@ router.post("/", async (req, res) => {
 //전체 프로젝트 리스트
 router.get("/", async (req, res) => {
     try {
+        const userId = req.body.userId;
+        const values = [userId];
         const selectQuery = `SELECT P.*
                             FROM "PROJECT" P
                             JOIN "MEMBER_PROJECT" MP ON P."ID" = MP."PROJECT_ID"
                             JOIN "MEMBER" M ON MP."MEMBER_ID" = M."MEMBER_ID"
-                            WHERE M."MEMBER_ID" = 1`;
+                            WHERE M."MEMBER_ID" = $1 AND P."IS_DELETED" != true`;
 
-        const result = await db.query(selectQuery);
+        const result = await db.query(selectQuery, values);
 
         res.json(result.rows);
     } catch (error) {
@@ -57,4 +73,21 @@ router.get("/:projectId", async (req, res) => {
     }
 });
 
+//프로젝트 삭제
+router.delete("/:projectId", async (req, res) => {
+    try {
+        const projectId = req.params.projectId;
+        const deleteQuery = `UPDATE "PROJECT" SET "IS_DELETED"=true WHERE "ID" = $1 RETURNING *`;
+        const values = [projectId];
+        const result = await db.query(deleteQuery, values);
+        if (result.rows.length === 0) {
+            res.status(404).json({ error: " 테스크를 찾을 수 없습니다." });
+        } else {
+            res.json(result.rows[0]);
+        }
+    } catch (error) {
+        console.error("테스크 삭제 중 오류 발생: ", error);
+        res.status(500).json({ error: "테스크 삭제 중 오류 발생" });
+    }
+});
 module.exports = router;
