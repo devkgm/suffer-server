@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const login = require("./router/login");
 const project = require("./router/project");
 const task = require("./router/task");
+const comment = require("./router/comment");
 
 require("dotenv").config();
 
@@ -21,6 +22,9 @@ app.use("/projects", project);
 
 //TASK
 app.use("/tasks", task);
+
+//COMMENT
+app.use("/comments", comment);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
