@@ -23,9 +23,9 @@ function generateRefreshToken(payload) {
 // 토큰 인증
 function verifyToken(token) {
     try {
-        return jwt.verify(token, secretKey);
+        return jwt.verify(token.accessToken, secretKey);
     } catch (error) {
-        return null;
+        return false;
     }
 }
 

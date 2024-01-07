@@ -28,11 +28,21 @@ const signIn = async (email, password) => {
 
         const selectQuery = `SELECT * FROM "MEMBER" WHERE "EMAIL" = $1`;
         const values = [user.email];
-        const info = await db.query(selectQuery, values);
-        return [user, refreshToken, accessToken, info.rows[0]];
+        const resultSet = await db.query(selectQuery, values);
+        const result = resultSet.rows[0];
+        const responseData = {
+            id: result.ID,
+            email: result.EMAIL,
+            company_id: result.COMPANY_ID,
+            name: result.NAME,
+            refreshToken: refreshToken,
+            accessToken: accessToken,
+            uid: user.uid,
+        };
+        return responseData;
     } catch (error) {
         console.error("로그인 실패:", error.code, error.message);
-        return [null, null, null];
+        return false;
     }
 };
 

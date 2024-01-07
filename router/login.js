@@ -7,19 +7,12 @@ router.post("/", async (req, res) => {
     const email = req.body.email;
     const pwd = req.body.password;
     console.log(req.body);
-    const [user, refreshToken, accessToken, info] = await signIn(email, pwd);
-    console.log({
-        user: user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        info: info,
-    });
-    res.status(200).json({
-        user: user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        info: info,
-    });
+    const responseData = await signIn(email, pwd);
+    if (responseData != false) {
+        res.status(200).json(responseData);
+    } else {
+        res.status(500).send();
+    }
 });
 
 module.exports = router;

@@ -5,12 +5,12 @@ const { verifyToken } = require("../module/tokenManager");
 
 router.post("/", async (req, res) => {
     try {
-        const { name, ownerId } = req.body;
+        const { title, ownerId, description } = req.body;
 
         await db.query("BEGIN");
 
-        const insertProjectQuery = `INSERT INTO "PROJECT" ("NAME", "OWNER_ID") VALUES ($1, $2) RETURNING *`;
-        const projectValues = [name, ownerId];
+        const insertProjectQuery = `INSERT INTO "PROJECT" ("TITLE", "OWNER_ID","DESCRIPTION") VALUES ($1, $2, $3) RETURNING *`;
+        const projectValues = [title, ownerId, description];
         const projectResult = await db.query(insertProjectQuery, projectValues);
 
         const insertMemberProjectQuery = `INSERT INTO "MEMBER_PROJECT" ("MEMBER_ID", "PROJECT_ID") VALUES ($1, $2) RETURNING *`;
@@ -34,7 +34,13 @@ router.post("/", async (req, res) => {
 router.get("/list/:userId", async (req, res) => {
     try {
         const userId = req.params.userId;
+        const authorization = JSON.parse(req.headers.authorization);
         const values = [userId];
+        console.log(authorization);
+        if (!verifyToken(authorization)) {
+            throw new Error("유효하지 않은 엑세스 토큰");
+        }
+
         const selectQuery = `SELECT P.*, (
                                             SELECT COUNT("ID") 
                                             FROM "MEMBER_PROJECT" MMP 
