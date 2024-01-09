@@ -2,6 +2,9 @@ const app = require("express")();
 const router = require("express").Router();
 const db = require("../service/db");
 const { verifyToken } = require("../module/tokenManager");
+const { authMidleware } = require("../module/authMidleware");
+
+router.use(authMidleware);
 
 router.post("/", async (req, res) => {
     try {
@@ -34,12 +37,7 @@ router.post("/", async (req, res) => {
 router.get("/list/:userId", async (req, res) => {
     try {
         const userId = req.params.userId;
-        const authorization = JSON.parse(req.headers.authorization);
         const values = [userId];
-        console.log(authorization);
-        if (!verifyToken(authorization)) {
-            throw new Error("유효하지 않은 엑세스 토큰");
-        }
 
         const selectQuery = `SELECT P.*, (
                                             SELECT COUNT("ID") 

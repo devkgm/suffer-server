@@ -23,7 +23,7 @@ function generateRefreshToken(payload) {
 // 토큰 인증
 function verifyToken(token) {
     try {
-        return jwt.verify(token.accessToken, secretKey);
+        return jwt.verify(token, secretKey);
     } catch (error) {
         return false;
     }
