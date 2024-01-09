@@ -4,12 +4,13 @@ const authMidleware = (req, res, next) => {
     const accessToken = req.headers.authorization.split(",")[1];
     const refreshToken = req.headers.authorization.split(",")[0];
     const email = req.headers.email;
-    console.log(accessToken, refreshToken, email);
     if (verifyToken(accessToken)) {
         next();
     } else {
         if (verifyToken(refreshToken)) {
             const accessToken = generateToken({ email: email });
+            res.setHeader("accessToken", accessToken);
+            next();
         } else {
             res.status(401).json({ message: "AccessToken is invalid" });
         }
