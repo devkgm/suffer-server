@@ -6,22 +6,31 @@ const { authMidleware } = require("../module/authMidleware");
 
 router.use(authMidleware);
 
+//add
 router.post("/", async (req, res) => {
     try {
-        const { title, ownerId, description } = req.body;
+        const { title, owner_id, description, members } = req.body;
 
         await db.query("BEGIN");
 
         const insertProjectQuery = `INSERT INTO "PROJECT" ("TITLE", "OWNER_ID","DESCRIPTION") VALUES ($1, $2, $3) RETURNING *`;
-        const projectValues = [title, ownerId, description];
+        const projectValues = [title, owner_id, description];
         const projectResult = await db.query(insertProjectQuery, projectValues);
 
         const insertMemberProjectQuery = `INSERT INTO "MEMBER_PROJECT" ("MEMBER_ID", "PROJECT_ID") VALUES ($1, $2) RETURNING *`;
-        const memberProjectValues = [ownerId, projectResult.rows[0].ID];
+        const memberProjectValues = [owner_id, projectResult.rows[0].ID];
         const memberProjectResult = await db.query(
             insertMemberProjectQuery,
             memberProjectValues
         );
+        for (let i = 0; i < members.length; i++) {
+            const insertMemberProjectQuery = `INSERT INTO "MEMBER_PROJECT" ("MEMBER_ID", "PROJECT_ID") VALUES ($1, $2) RETURNING *`;
+            const memberProjectValues = [members[i], projectResult.rows[0].ID];
+            const memberProjectResult = await db.query(
+                insertMemberProjectQuery,
+                memberProjectValues
+            );
+        }
 
         await db.query("COMMIT");
 

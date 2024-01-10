@@ -5,6 +5,8 @@ const login = require("./router/login");
 const project = require("./router/project");
 const task = require("./router/task");
 const comment = require("./router/comment");
+const member = require("./router/member");
+const company = require("./router/company");
 
 require("dotenv").config();
 
@@ -19,6 +21,11 @@ app.use("/login", login);
 
 //project
 app.use("/projects", project);
+
+//member
+app.use("/members", member);
+//company
+app.use("/company", company);
 
 //TASK
 app.use("/tasks", task);
