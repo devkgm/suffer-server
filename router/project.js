@@ -3,6 +3,7 @@ const router = require("express").Router();
 const db = require("../service/db");
 const { verifyToken } = require("../module/tokenManager");
 const { authMidleware } = require("../module/authMidleware");
+const { projectId } = require("../service/config");
 
 router.use(authMidleware);
 
@@ -98,17 +99,18 @@ router.get("/:projectId", async (req, res) => {
 router.delete("/:projectId", async (req, res) => {
     try {
         const projectId = req.params.projectId;
+        console.log(projectId);
         const deleteQuery = `UPDATE "PROJECT" SET "IS_DELETED"=true WHERE "ID" = $1 RETURNING *`;
         const values = [projectId];
         const result = await db.query(deleteQuery, values);
         if (result.rows.length === 0) {
-            res.status(404).json({ error: " 테스크를 찾을 수 없습니다." });
+            res.status(404).json({ error: " 프로젝트를 찾을 수 없습니다." });
         } else {
-            res.json(result.rows[0]);
+            res.status(200).json(result.rows[0]);
         }
     } catch (error) {
-        console.error("테스크 삭제 중 오류 발생: ", error);
-        res.status(500).json({ error: "테스크 삭제 중 오류 발생" });
+        console.error("프로젝트 삭제 중 오류 발생: ", error);
+        res.status(500).json({ error: "프로젝트 삭제 중 오류 발생" });
     }
 });
 module.exports = router;

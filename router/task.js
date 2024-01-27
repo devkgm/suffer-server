@@ -6,20 +6,22 @@ const { verifyToken } = require("../module/tokenManager");
 //테스크 생성
 router.post("/", async (req, res) => {
     try {
-        const { name, description, projectId, ownerId } = req.body;
-        const taskValues = [name, description, projectId, ownerId];
+        const { title, description, project_id, owner_id, members } = req.body;
+        const taskValues = [title, description, project_id, owner_id];
 
         await db.query("BEGIN");
 
-        const insertTaskQuery = `INSERT INTO "TASK" ("NAME", "DESCRIPTION", "PROJECT_ID", "OWNER_ID") VALUES ($1,$2,$3,$4) RETURNING *`;
+        const insertTaskQuery = `INSERT INTO "TASK" ("TITLE", "DESCRIPTION", "PROJECT_ID", "OWNER_ID") VALUES ($1,$2,$3,$4) RETURNING *`;
         const taskResult = await db.query(insertTaskQuery, taskValues);
 
-        const memberTaskValues = [ownerId, taskResult.rows[0].ID];
-        const insertMemberTaskQuery = `INSERT INTO "MEMBER_TASK" ("MEMBER_ID", "TASK_ID") VALUES ($1, $2)`;
-        const memberTaskResult = await db.query(
-            insertMemberTaskQuery,
-            memberTaskValues
-        );
+        for (let i = 0; i < members.length; i++) {
+            const memberTaskValues = [members[i], taskResult.rows[0].ID];
+            const insertMemberTaskQuery = `INSERT INTO "MEMBER_TASK" ("MEMBER_ID", "TASK_ID") VALUES ($1, $2)`;
+            const memberTaskResult = await db.query(
+                insertMemberTaskQuery,
+                memberTaskValues
+            );
+        }
 
         await db.query("COMMIT");
         res.status(201).json(taskResult.rows[0]);
